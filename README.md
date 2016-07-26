@@ -1,4 +1,6 @@
-# MY.js - 一个 Hybrid App 通用接口
+# MY.js
+
+一个 Hybrid App 的通用基础库
 
 ## MY.Version
 

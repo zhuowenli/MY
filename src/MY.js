@@ -47,7 +47,6 @@ document.addEventListener('error', function (err) {
         err.target.tagName === 'VIDEO'||
         err.target.tagName === 'AUDIO'||
         err.target.tagName === 'SOURCE') {
-        console.log(err)
         srcError.onError.call(err.target, err);
     }
 }, true);

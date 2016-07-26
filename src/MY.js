@@ -9,6 +9,7 @@ import config from './config.js';
 import Version from './utils/version.js';
 import ua from './utils/ua.js';
 import appBridge from './utils/app-bridge.js';
+import srcError from "./utils/src-error.js";
 
 const MY = window.MY = window.MY || {};
 
@@ -31,3 +32,25 @@ if (MY.isApp) {
 
 MY.locationOrigin = locationOrigin;
 MY.locationHost = locationHost;
+
+
+/**
+ * src资源加载失败时，直接访问服务器ip地址
+ * js无法直接获取服务器ip，可以通过客户端的appBridge接口来获取：
+ * appBridge.callHandler('query_ip', {host: host}, function(res) {
+ *     // get res.ip
+ * });
+ */
+document.addEventListener('error', function (err) {
+    if (err.target.tagName === 'IMG' ||
+        err.target.tagName === 'SCRIPT' ||
+        err.target.tagName === 'VIDEO'||
+        err.target.tagName === 'AUDIO'||
+        err.target.tagName === 'SOURCE') {
+        console.log(err)
+        srcError.onError.call(err.target, err);
+    }
+}, true);
+
+
+

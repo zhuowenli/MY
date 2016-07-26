@@ -18,7 +18,12 @@ function connectWebViewJavascriptBridge(callback) {
     }
 }
 
-//bridge接口兼容
+/**
+ * Bridge接口兼容
+ * @param  {String}   action   接口名
+ * @param  {Object}   data     接口数据
+ * @param  {Function} callback 回调函数
+ */
 function compat(action, data, callback) {
     switch (action) {
         case 'get_query_string':
@@ -38,9 +43,20 @@ function compat(action, data, callback) {
 }
 
 const api = {
+    /**
+     * 直接向客户端推送一条消息，客户端不会产生回调。
+     * @param  {string}   message          消息
+     * @param  {Function} responseCallback 成功后的回调
+     */
     defaultHandler: function(message, responseCallback) {
         responseCallback('got');
     },
+
+    /**
+     * 通过send直接向客户端发送数据
+     * @param  {Object}   data     接口数据
+     * @param  {Function} callback 回调函数
+     */
     send: function(data, callback) {
         connectWebViewJavascriptBridge(function(bridge) {
             bridge.send(data, function(ret) {
@@ -48,6 +64,13 @@ const api = {
             });
         });
     },
+
+    /**
+     * 请求Bridge接口
+     * @param  {String}   action   接口名
+     * @param  {Object}   data     接口数据
+     * @param  {Function} callback 回调函数
+     */
     callHandler: function(action, data, callback) {
         if(typeof data === 'function') {
             callback = data;
@@ -62,6 +85,12 @@ const api = {
             });
         });
     },
+
+    /**
+     * 监听Bridge接口
+     * @param  {String}   action   接口名
+     * @param  {Function} callback 回调函数
+     */
     registerHandler: function(action, callback) {
         connectWebViewJavascriptBridge(function(bridge) {
             bridge.registerHandler(action, function(ret) {

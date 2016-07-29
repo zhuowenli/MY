@@ -247,9 +247,13 @@ var _appBridge = require('./utils/app-bridge.js');
 
 var _appBridge2 = _interopRequireDefault(_appBridge);
 
-var _srcError = require('./utils/src-error.js');
+var _Error = require('./utils/Error.js');
 
-var _srcError2 = _interopRequireDefault(_srcError);
+var _Error2 = _interopRequireDefault(_Error);
+
+var _dateFormat = require('./utils/date-format.js');
+
+var _dateFormat2 = _interopRequireDefault(_dateFormat);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -258,6 +262,7 @@ var MY = window.MY = window.MY || {};
 MY.ua = _ua2.default;
 MY.Version = _version2.default;
 MY.appBridge = _appBridge2.default;
+MY.Error = _Error2.default;
 
 MY.isApp = _ua2.default.app;
 MY.isDevApp = _ua2.default.app && _ua2.default.app.isDev;
@@ -275,13 +280,12 @@ MY.locationOrigin = locationOrigin;
 MY.locationHost = locationHost;
 
 document.addEventListener('error', function (err) {
-    if (err.target.tagName === 'IMG' || err.target.tagName === 'SCRIPT' || err.target.tagName === 'VIDEO' || err.target.tagName === 'AUDIO' || err.target.tagName === 'SOURCE') {
-        console.log(err);
-        _srcError2.default.onError.call(err.target, err);
+    if (err.target.tagName === 'IMG' || err.target.tagName === 'SCRIPT' || err.target.tagName === 'VIDEO' || err.target.tagName === 'AUDIO' || err.target.tagName === 'SOURCE' || err.target.tagName === 'LINK') {
+        _Error2.default.onerror.call(err.target, err);
     }
 }, true);
 
-},{"./config.js":22,"./utils/app-bridge.js":23,"./utils/src-error.js":24,"./utils/ua.js":25,"./utils/version.js":26}],22:[function(require,module,exports){
+},{"./config.js":22,"./utils/Error.js":23,"./utils/app-bridge.js":24,"./utils/date-format.js":25,"./utils/ua.js":26,"./utils/version.js":27}],22:[function(require,module,exports){
 
 'use strict';
 
@@ -294,6 +298,72 @@ module.exports = {
 };
 
 },{}],23:[function(require,module,exports){
+
+'use strict';
+
+var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = require('babel-runtime/helpers/createClass');
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var appBridge = require('./app-bridge');
+
+var Error = function () {
+    function Error() {
+        (0, _classCallCheck3.default)(this, Error);
+
+        return this;
+    }
+
+    (0, _createClass3.default)(Error, [{
+        key: 'onError',
+        value: function onError(err) {
+            var src = err.target.src;
+            var href = err.target.href;
+
+            src = src || href;
+
+            if (!this.dataset.ip) {
+                Error.queryIP(src).done(function (ip, host) {
+                    this.dataset.ip = ip;
+
+                    if (err.target.tagName === 'LINK') {
+                        this.src = this.src.replace(host, ip);
+                    } else {
+                        this.href = this.href.replace(host, ip);
+                    }
+                }.bind(this));
+            }
+        }
+    }, {
+        key: 'queryIP',
+        value: function queryIP(url) {
+            var def = $.Deferred();
+            var hostReg = /^https?:\/\/([^:\/\?#]+)/;
+            var urlMatch = url.match(hostReg);
+            if (urlMatch && urlMatch.length) {
+                var host = urlMatch[1];
+
+                appBridge.callHandler('query_ip', {
+                    host: host
+                }, function (ret) {
+                    def.resolve(ret.ip, host);
+                });
+            }
+            return def.promise();
+        }
+    }]);
+    return Error;
+}();
+
+module.exports = new Error();
+
+},{"./app-bridge":24,"babel-runtime/helpers/classCallCheck":2,"babel-runtime/helpers/createClass":3}],24:[function(require,module,exports){
 
 'use strict';
 
@@ -376,64 +446,40 @@ api.connectWebViewJavascriptBridge = connectWebViewJavascriptBridge;
 
 module.exports = api;
 
-},{"./ua.js":25}],24:[function(require,module,exports){
+},{"./ua.js":26}],25:[function(require,module,exports){
 
 'use strict';
 
-var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
+module.exports = function (date, format) {
+    date = new Date(date);
 
-var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+    var map = {
+        "M": date.getMonth() + 1,
+        "d": date.getDate(),
+        "h": date.getHours(),
+        "m": date.getMinutes(),
+        "s": date.getSeconds(),
+        "q": Math.floor((date.getMonth() + 3) / 3),
+        "S": date.getMilliseconds() };
 
-var _createClass2 = require('babel-runtime/helpers/createClass');
-
-var _createClass3 = _interopRequireDefault(_createClass2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var appBridge = require('./app-bridge');
-
-var srcError = function () {
-    function srcError() {
-        (0, _classCallCheck3.default)(this, srcError);
-
-        return this;
-    }
-
-    (0, _createClass3.default)(srcError, [{
-        key: 'onError',
-        value: function onError(err) {
-            var src = err.target.src;
-            if (!this.dataset.ip) {
-                srcError.queryIP(src).done(function (ip, host) {
-                    this.dataset.ip = ip;
-                    this.src = this.src.replace(host, ip);
-                }.bind(this));
+    format = format.replace(/([yMdhmsqS])+/g, function (all, t) {
+        var v = map[t];
+        if (v !== undefined) {
+            if (all.length > 1) {
+                v = '0' + v;
+                v = v.substr(v.length - 2);
             }
+            return v;
+        } else if (t === 'y') {
+            return (date.getFullYear() + '').substr(4 - all.length);
         }
-    }, {
-        key: 'queryIP',
-        value: function queryIP(url) {
-            var def = $.Deferred();
-            var hostReg = /^https?:\/\/([^:\/\?#]+)/;
-            var urlMatch = url.match(hostReg);
-            if (urlMatch && urlMatch.length) {
-                var host = urlMatch[1];
+        return all;
+    });
 
-                appBridge.callHandler('query_ip', {
-                    host: host
-                }, function (ret) {
-                    def.resolve(ret.ip, host);
-                });
-            }
-            return def.promise();
-        }
-    }]);
-    return srcError;
-}();
+    return format;
+};
 
-module.exports = new srcError();
-
-},{"./app-bridge":23,"babel-runtime/helpers/classCallCheck":2,"babel-runtime/helpers/createClass":3}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 
 'use strict';
 
@@ -593,7 +639,7 @@ module.exports = {
     app: app
 };
 
-},{"../config.js":22}],26:[function(require,module,exports){
+},{"../config.js":22}],27:[function(require,module,exports){
 
 'use strict';
 

@@ -7,16 +7,25 @@
 
 var appBridge = require('./app-bridge');
 
-class srcError {
+class Error {
     constructor() {
         return this;
     }
     onError(err) {
         var src = err.target.src;
+        var href = err.target.href;
+
+        src = src || href;
+
         if (!this.dataset.ip) {
-            srcError.queryIP(src).done(function (ip, host) {
+            Error.queryIP(src).done(function (ip, host) {
                 this.dataset.ip = ip;
-                this.src = this.src.replace(host, ip);
+
+                if (err.target.tagName === 'LINK') {
+                    this.src = this.src.replace(host, ip);
+                } else {
+                    this.href = this.href.replace(host, ip);
+                }
             }.bind(this))
         }
     }
@@ -37,4 +46,4 @@ class srcError {
     }
 }
 
-module.exports = new srcError();
+module.exports = new Error();

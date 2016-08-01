@@ -16,6 +16,9 @@
             -webkit-box-sizing: border-box;
             box-sizing: border-box;
         }
+        #app{
+            padding: 5px;
+        }
         pre{
             width: 100%;
             background: #f2f2f2;
@@ -35,6 +38,13 @@
         <div id="dataFormat"></div>
         <script type="text/javascript">
             document.getElementById('dataFormat').innerHTML = '// ' + MY.dateFormat(new Date(), 'yyyy-MM-dd hh:mm:ss');
+        </script>
+
+        <h2>MY.Version</h2>
+        <pre><code>MY.Version('1.9.1', '2.1.0');</code></pre>
+        <div id="Version"></div>
+        <script type="text/javascript">
+            document.getElementById('Version').innerHTML = '// ' + MY.Version('1.9.1', '2.1.0');
         </script>
     </div>
 

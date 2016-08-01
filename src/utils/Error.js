@@ -5,20 +5,21 @@
  */
 'use strict';
 
-var appBridge = require('./app-bridge');
+import appBridge from './app-bridge';
+import config from '../config.js';
 
 class Error {
     constructor() {
         return this;
     }
     onError(err) {
-        var src = err.target.src;
-        var href = err.target.href;
+        const href = err.target.href;
+        let src = err.target.src;
 
         src = src || href;
 
         if (!this.dataset.ip) {
-            Error.queryIP(src).done(function (ip, host) {
+            Error.queryIP(src).done(function(ip, host) {
                 this.dataset.ip = ip;
 
                 if (err.target.tagName === 'LINK') {
@@ -26,22 +27,24 @@ class Error {
                 } else {
                     this.href = this.href.replace(host, ip);
                 }
-            }.bind(this))
+            }.bind(this));
         }
     }
     queryIP(url) {
-        var def = $.Deferred();
-        var hostReg = /^https?:\/\/([^:\/\?#]+)/;
-        var urlMatch = url.match(hostReg);
+        const def = $.Deferred();
+        const hostReg = /^https?:\/\/([^:\/\?#]+)/;
+        const urlMatch = url.match(hostReg);
+
         if (urlMatch && urlMatch.length) {
-            var host = urlMatch[1];
+            const host = urlMatch[1];
 
             appBridge.callHandler('query_ip', {
                 host: host
-            }, function (ret) {
+            }, (ret) => {
                 def.resolve(ret.ip, host);
             });
         }
+
         return def.promise();
     }
 }

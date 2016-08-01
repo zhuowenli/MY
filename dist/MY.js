@@ -263,6 +263,7 @@ MY.ua = _ua2.default;
 MY.Version = _version2.default;
 MY.appBridge = _appBridge2.default;
 MY.Error = _Error2.default;
+MY.dateFormat = _dateFormat2.default;
 
 MY.isApp = _ua2.default.app;
 MY.isDevApp = _ua2.default.app && _ua2.default.app.isDev;
@@ -294,8 +295,8 @@ module.exports = {
     isApp: /(Meiya(?:-dev)?)/,
     isDevApp: /Meiya-dev/,
     appVersion: /Meiya(?:-dev)?\/(\d+\.\d+\.\d+(?:\.\d+)?)\D/
-  }
-};
+  },
+  ip: '104.236.190.8' };
 
 },{}],23:[function(require,module,exports){
 
@@ -309,9 +310,15 @@ var _createClass2 = require('babel-runtime/helpers/createClass');
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _appBridge = require('./app-bridge');
 
-var appBridge = require('./app-bridge');
+var _appBridge2 = _interopRequireDefault(_appBridge);
+
+var _config = require('../config.js');
+
+var _config2 = _interopRequireDefault(_config);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var Error = function () {
     function Error() {
@@ -323,8 +330,8 @@ var Error = function () {
     (0, _createClass3.default)(Error, [{
         key: 'onError',
         value: function onError(err) {
-            var src = err.target.src;
             var href = err.target.href;
+            var src = err.target.src;
 
             src = src || href;
 
@@ -346,15 +353,19 @@ var Error = function () {
             var def = $.Deferred();
             var hostReg = /^https?:\/\/([^:\/\?#]+)/;
             var urlMatch = url.match(hostReg);
-            if (urlMatch && urlMatch.length) {
-                var host = urlMatch[1];
 
-                appBridge.callHandler('query_ip', {
-                    host: host
-                }, function (ret) {
-                    def.resolve(ret.ip, host);
-                });
+            if (urlMatch && urlMatch.length) {
+                (function () {
+                    var host = urlMatch[1];
+
+                    _appBridge2.default.callHandler('query_ip', {
+                        host: host
+                    }, function (ret) {
+                        def.resolve(ret.ip, host);
+                    });
+                })();
             }
+
             return def.promise();
         }
     }]);
@@ -363,7 +374,7 @@ var Error = function () {
 
 module.exports = new Error();
 
-},{"./app-bridge":24,"babel-runtime/helpers/classCallCheck":2,"babel-runtime/helpers/createClass":3}],24:[function(require,module,exports){
+},{"../config.js":22,"./app-bridge":24,"babel-runtime/helpers/classCallCheck":2,"babel-runtime/helpers/createClass":3}],24:[function(require,module,exports){
 
 'use strict';
 

@@ -1,15 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta charset="utf-8">
+    <style>
+        html, body{
+            margin: 0;
+            padding: 0;
+            -webkit-overflow-scrolling: touch;
+        }
+        *, *:before, *:after{
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+        pre{
+            width: 100%;
+            background: #f2f2f2;
+            padding: 10px;
+            overflow-x: scroll;
+        }
+        pre code{
+            font-size: 14px;
+        }
+    </style>
+    <script type="text/javascript" src="dist/MY.js"></script>
 </head>
 <body>
+    <div id="app">
+        <h2>MY.dataFormat</h2>
+        <pre><code>MY.dateFormat(new Date(), 'yyyy-MM-dd hh:mm:ss');</code></pre>
+        <div id="dataFormat"></div>
+        <script type="text/javascript">
+            document.getElementById('dataFormat').innerHTML = '// ' + MY.dateFormat(new Date(), 'yyyy-MM-dd hh:mm:ss');
+        </script>
+    </div>
 
-<img src="1">
-
-<script type="text/javascript" src="dist/MY.js"></script>
-<script type="text/javascript">
-console.log(MY);
-</script>
+    <script type="text/javascript">
+        console.log(MY);
+    </script>
 </body>
 </html>

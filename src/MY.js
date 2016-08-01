@@ -18,6 +18,7 @@ MY.ua = ua;
 MY.Version = Version;
 MY.appBridge = appBridge;
 MY.Error = Error;
+MY.dateFormat = dateFormat;
 
 MY.isApp = ua.app;
 MY.isDevApp = ua.app && ua.app.isDev;
@@ -33,7 +34,6 @@ if (MY.isApp) {
 
 MY.locationOrigin = locationOrigin;
 MY.locationHost = locationHost;
-
 
 /**
  * 链接资源加载失败时，直接访问服务器ip地址
@@ -52,6 +52,5 @@ document.addEventListener('error', function (err) {
         Error.onerror.call(err.target, err);
     }
 }, true);
-
 
 
